@@ -29,20 +29,52 @@ function typeName() {
 reducedMotion.addEventListener('change', event => { if (event.matches) showFullName(); });
 
 document.querySelector('#year').textContent = new Date().getFullYear();
-typeName();
-
-// Pause the background when off-screen or when reduced motion is requested.
+// Keep a matching poster visible until the browser presents a video frame.
+const root = document.documentElement;
 const backgroundVideo = document.querySelector('.background-video');
+let introShown = false;
+let fallbackTimer;
+function revealIntro() {
+  if (introShown) return;
+  introShown = true;
+  clearTimeout(fallbackTimer);
+  root.classList.add('intro-ready');
+  typeName();
+}
+fallbackTimer = setTimeout(revealIntro, 4000);
 if (backgroundVideo) {
   let videoVisible = true;
+  let framePending = false;
   backgroundVideo.muted = true;
+  function presentVideo() {
+    if (backgroundVideo.error || reducedMotion.matches) return;
+    root.classList.add('video-ready');
+    revealIntro();
+  }
+  function confirmFrame() {
+    if (framePending || backgroundVideo.readyState < 2) return;
+    framePending = true;
+    if ('requestVideoFrameCallback' in backgroundVideo) {
+      backgroundVideo.requestVideoFrameCallback(() => { framePending = false; presentVideo(); });
+    } else {
+      requestAnimationFrame(() => { framePending = false; presentVideo(); });
+    }
+  }
   function syncVideo() {
-    if (reducedMotion.matches || document.hidden || !videoVisible) backgroundVideo.pause();
-    else backgroundVideo.play().catch(() => {});
+    if (reducedMotion.matches || document.hidden || !videoVisible) {
+      backgroundVideo.pause();
+      if (reducedMotion.matches) { root.classList.remove('video-ready'); revealIntro(); }
+    } else {
+      backgroundVideo.play().then(confirmFrame).catch(revealIntro);
+    }
   }
   new IntersectionObserver(entries => { videoVisible = entries[0].isIntersecting; syncVideo(); }).observe(backgroundVideo);
   reducedMotion.addEventListener('change', syncVideo);
   document.addEventListener('visibilitychange', syncVideo);
+  backgroundVideo.addEventListener('playing', confirmFrame);
   backgroundVideo.addEventListener('loadeddata', syncVideo);
+  function videoFailed() { root.classList.remove('video-ready'); revealIntro(); }
+  backgroundVideo.addEventListener('error', videoFailed);
+  backgroundVideo.querySelector('source')?.addEventListener('error', videoFailed);
   syncVideo();
-}
+} else revealIntro();
