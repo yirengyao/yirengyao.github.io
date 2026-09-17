@@ -9,3 +9,9 @@
 .background-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;z-index:-1}.video-shade{position:absolute;inset:0;background:linear-gradient(180deg,#0000000d,#00000020 55%,#00000055);pointer-events:none;z-index:-1}.cat-character{filter:drop-shadow(0 2px 2px #0009)}.cat-bee{filter:drop-shadow(0 1px 2px #000b)}
 
 .hero-name{transform:translateY(-160%)}
+
+/* Center the growing name and retain the reference-style underscore cursor. */
+.name-space{display:none}.name-typing{position:relative;display:inline-block;left:auto;top:auto}.hero-name .typing-caret{display:inline-block;width:auto;height:auto;background:none;vertical-align:baseline;margin-left:.06em;font:inherit;letter-spacing:0;animation:blink .6s step-end infinite}.hero-name .typing-caret.is-typing{animation:none}@media(prefers-reduced-motion:reduce){.hero-name .typing-caret{animation:none;opacity:1}}
+
+/* Small underscore, softer blink, and a lighter visual weight. */
+.hero-name .typing-caret{width:.3em;height:3px;background:currentColor;margin-left:.075em;vertical-align:.015em;animation:caret-breathe 1.15s ease-in-out infinite}.hero-name .typing-caret.is-typing{animation:none;opacity:.85}@keyframes caret-breathe{0%,25%,100%{opacity:.85}55%,75%{opacity:.08}}@media(prefers-reduced-motion:reduce){.hero-name .typing-caret{animation:none;opacity:.85}}

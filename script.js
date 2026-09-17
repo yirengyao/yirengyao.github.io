@@ -3,24 +3,31 @@ const caret = document.querySelector('.typing-caret');
 const fullName = nameElement.textContent;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let timer;
+const typingDelays = [150, 110, 180, 95, 140, 220, 105, 160];
+caret.textContent = ''; // Compact cursor is drawn by CSS.
 function showFullName() {
   clearTimeout(timer);
   nameElement.textContent = fullName;
-  caret.hidden = true;
+  caret.hidden = false;
+  caret.classList.remove('is-typing');
 }
 function typeName() {
+  clearTimeout(timer);
   if (reducedMotion.matches) { showFullName(); return; }
   nameElement.textContent = '';
   caret.hidden = false;
+  caret.classList.add('is-typing');
+  const letters = Array.from(fullName);
   let index = 0;
   function typeNext() {
-    nameElement.textContent = fullName.slice(0, ++index);
-    if (index < fullName.length) timer = setTimeout(typeNext, 180);
-    else timer = setTimeout(() => { caret.hidden = true; }, 650);
+    nameElement.textContent = letters.slice(0, ++index).join('');
+    if (index < letters.length) timer = setTimeout(typeNext, typingDelays[(index - 1) % typingDelays.length]);
+    else timer = setTimeout(() => { caret.classList.remove('is-typing'); }, 350);
   }
-  timer = setTimeout(typeNext, 350);
+  timer = setTimeout(typeNext, 450);
 }
 reducedMotion.addEventListener('change', event => { if (event.matches) showFullName(); });
+
 document.querySelector('#year').textContent = new Date().getFullYear();
 typeName();
 
